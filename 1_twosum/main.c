@@ -1,14 +1,20 @@
-/**
+
+/*
  * Note: The returned array must be malloced, assume caller calls free().
  */
 
+#include <math.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
+typedef struct ArrADT {
+  int *A;
+  int size;
+  int l;
+} ArrADT;
 
-void quickSort(int *nums, int lo, int hi);
-int findMiddle(int *A, int m, int n);
-void swap(int *x, int *y);
+void addBinArr(ArrADT *arr, int val);
+void algs_radixSort_altered(int *A, int N);
 
 int *twoSum(int *nums, int numsSize, int target, int *returnSize) {
 
@@ -18,7 +24,7 @@ int *twoSum(int *nums, int numsSize, int target, int *returnSize) {
 
   memcpy(tempArr, nums, sizeof(int) * numsSize);
 
-  quickSort(tempArr, 0, numsSize);
+  algs_radixSort_altered(tempArr, numsSize);
 
   int lo = 0;
   int hi = numsSize - 1;
@@ -47,57 +53,76 @@ int *twoSum(int *nums, int numsSize, int target, int *returnSize) {
   return A;
 }
 
-void quickSort(int *nums, int lo, int hi) {
-  if (hi - lo <= 1)
+void algs_radixSort_altered(int *A, int N) {
+  if (A == NULL) {
+    fflush(stdout);
+    fprintf(stderr, "\nError: Null pointer in algs_radixSort\n");
     return;
-  swap(&nums[lo], &nums[findMiddle(nums, lo, hi)]);
+  }
 
-  int pivot = nums[lo];
+  int maxVal = A[0];
+  int minVal = A[0];
+  for (int i = 1; i < N; i++) {
+    if (maxVal < A[i])
+      maxVal = A[i];
+    if (minVal > A[i])
+      minVal = A[i];
+  }
 
-  int i = lo + 1;
-  int j = hi - 1;
+  int absMaxVal = maxVal;
+  int absMinVal = abs(minVal);
+  if (absMaxVal < absMinVal)
+    absMaxVal = absMinVal;
 
-  do {
-    if (nums[i] > pivot && nums[j] <= pivot)
-      swap(&nums[i], &nums[j]);
-    if (nums[i] <= pivot)
-      i++;
-    if (nums[j] > pivot)
-      j--;
-  } while (i <= j);
+  ArrADT *bins[32] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
-  swap(&nums[lo], &nums[j]);
+  for (int i = 0; i < 32; i++) {
+    bins[i] = malloc(sizeof(ArrADT));
+    bins[i]->size = 100;
+    bins[i]->A = malloc(sizeof(int) * bins[i]->size);
+    bins[i]->l = 0;
+  }
 
-  quickSort(nums, i, hi);
-  quickSort(nums, lo, j);
+  for (int bitsh = 1; (absMaxVal / bitsh) != 0; bitsh *= 16) {
+    // First sort array values into the bins
+    for (int i = 0; i < N; i++) {
+      int binNo = (A[i] / bitsh) % 16 + 16;
+      addBinArr(bins[binNo], A[i]);
+    }
+
+    // Now pop the bins in order back into the array
+    int aInd = 0;
+    for (int i = 0; i < 32; i++) {
+      for (int j = 0; j < bins[i]->l; j++)
+        A[aInd++] = bins[i]->A[j];
+      bins[i]->l = 0;
+    }
+  }
+
+  for (int i = 0; i < 32; i++) {
+    free(bins[i]->A);
+    free(bins[i]);
+  }
 }
 
-int findMiddle(int *A, int m, int n) {
-  int lo = A[m];
-  int midInd = (m + n) / 2;
-  int mid = A[midInd];
-  int hi = A[n - 1];
-
-  if ((lo < mid && mid < hi) || (hi < mid && mid < lo))
-    return midInd;
-  if ((lo < hi && hi < mid) || (mid < hi && hi < lo))
-    return n - 1;
-  else
-    return m;
-}
-
-void swap(int *x, int *y) {
-  int temp = *y;
-  *y = *x;
-  *x = temp;
+void addBinArr(ArrADT *arr, int val) {
+  arr->l++;
+  if (arr->l >= arr->size) {
+    arr->size *= 2;
+    arr->A = realloc(arr->A, sizeof(int) * arr->size);
+  }
+  arr->A[arr->l - 1] = val;
 }
 
 int main() {
-  int myNums[] = {2, 0, -4, 13, 12, 9, -3};
+  int myNums[] = {2, 0, 124, 90, 1024, -105365, -4, 13, 12, 9, -3};
   // int myNums[] = {3, 3};
   int returnSize;
   int N = sizeof(myNums) / sizeof(int);
-  int *A = twoSum(myNums, N, 11, &returnSize);
+  int *A = twoSum(myNums, N, -105365, &returnSize);
 
   printf("The two numbers at position %d and %d\n", A[0], A[1]);
   free(A);

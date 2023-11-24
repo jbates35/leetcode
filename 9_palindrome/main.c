@@ -27,17 +27,14 @@ bool isPalindrome(int x) {
   if (x < 10)
     return true;
 
-  int arr[32];
-  int L = 0;
-  int i = 0;
-  for (; x > 0; i++, x /= 10) {
-    arr[i] = x % 10;
-  }
+  int reverse = 0;
+  long k = 1;
+  for (; k * 10 <= x; k *= 10)
+    ;
 
-  for (int j = 0; j < i; i--, j++) {
-    if (arr[j] != arr[i - 1])
+  for (long r = 1; r < k; r *= 10, k /= 10)
+    if ((x / k) % 10 != (x / r) % 10)
       return false;
-  }
   return true;
 }
 

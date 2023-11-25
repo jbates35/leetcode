@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 void funcTime(int (*fp)(char *), char *x, char *funcName);
@@ -15,28 +16,30 @@ typedef struct StringHashNode {
 ///////////// START
 int lengthOfLongestSubstring(char *s) {
 
-  int maxVal = 0;
-  for (int x = 0; s[x] != '\0'; x++) {
-    unsigned long matchLower = 0;
-    unsigned long matchUpper = 0;
-    int i;
-    for (i = x; s[i] != '\0'; i++) {
-      if (s[i] < 64) {
-        if ((1UL << s[i]) & matchLower)
-          break;
-        matchLower |= (long)(1UL << s[i]);
-      } else {
-        if ((1UL << (s[i] - 64)) & matchUpper)
-          break;
-        matchUpper |= (long)(1UL << (s[i] - 64));
-      }
-    }
-    if (i - x > maxVal)
-      maxVal = i - x;
+  if (s[0] == '\0')
+    return 0;
 
-    if (s[i] == '\0')
-      break;
+  int maxVal = 1;
+  int lastColInd = 0;
+
+  int *cols = calloc(128, sizeof(int));
+
+  int i;
+  for (i = 0; s[i] != '\0'; i++) {
+    int cmpVal;
+    if (cols[s[i]] > lastColInd) {
+      cmpVal = cols[s[i]] - 1;
+      lastColInd = cols[s[i]];
+    } else {
+      cmpVal = lastColInd - 1;
+    }
+
+    if (maxVal < i - cmpVal)
+      maxVal = i - cmpVal;
+
+    cols[s[i]] = i + 1;
   }
+  free(cols);
   return maxVal;
 }
 
@@ -44,7 +47,7 @@ int lengthOfLongestSubstring(char *s) {
 
 int main() {
   char strings[100][100] = {
-      "asdasdf", "abcabcbb", "bbbbb", "pwwkew",
+      "asdf", " ", "bbbbb", "pwwkew",
       "asjdfoaiwefjowaifaweoifawoeifawefioewffjasdflkjasdflsdafawleij"};
   for (int i = 0; i < 5; i++) {
     funcTime(lengthOfLongestSubstring, strings[i], "lengthOfLongestSubstring");

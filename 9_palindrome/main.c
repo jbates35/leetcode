@@ -27,7 +27,6 @@ bool isPalindrome(int x) {
   if (x < 10)
     return true;
 
-  int reverse = 0;
   long k = 1;
   for (; k * 10 <= x; k *= 10)
     ;

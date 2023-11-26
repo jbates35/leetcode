@@ -20,26 +20,26 @@ int lengthOfLongestSubstring(char *s) {
     return 0;
 
   int maxVal = 1;
-  int lastColInd = 0;
+  int lastColInd = -1;
 
-  int *cols = calloc(128, sizeof(int));
+  int cols[128];
+  memset(cols, -1, 128 * sizeof(int));
 
   int i;
   for (i = 0; s[i] != '\0'; i++) {
     int cmpVal;
     if (cols[s[i]] > lastColInd) {
-      cmpVal = cols[s[i]] - 1;
+      cmpVal = cols[s[i]];
       lastColInd = cols[s[i]];
     } else {
-      cmpVal = lastColInd - 1;
+      cmpVal = lastColInd;
     }
 
     if (maxVal < i - cmpVal)
       maxVal = i - cmpVal;
 
-    cols[s[i]] = i + 1;
+    cols[s[i]] = i;
   }
-  free(cols);
   return maxVal;
 }
 

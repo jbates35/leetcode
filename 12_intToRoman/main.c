@@ -8,12 +8,46 @@
 
 #define TIME_TEST 0
 
+typedef struct RomanNum {
+  char letter[3];
+  int length;
+  int advance;
+  int value;
+} RomanNum;
+
 void funcTime(char *(*fp)(int), int x, char *funcName);
 
 ///////////// START
 
 char *intToRoman(int num) {
+  RomanNum roman_nums[13] = {
+      {"I", 1, 1, 1},   {"IV", 2, 2, 4},   {"V", 1, 1, 5},   {"IX", 2, 4, 4},
+      {"X", 1, 1, 10},  {"XL", 2, 2, 40},  {"L", 1, 1, 50},  {"XC", 2, 4, 90},
+      {"C", 1, 1, 100}, {"CD", 2, 2, 400}, {"D", 1, 1, 500}, {"CM", 2, 4, 900},
+      {"M", 1, 1, 1000}
+
+  };
+
+  int x = 12;
+  int i = 0;
   char *roman = malloc(16);
+
+  while (x >= 0) {
+    if (num >= roman_nums[x].value) {
+      num -= roman_nums[x].value;
+      for (int j = 0; j < roman_nums[x].length; j++)
+        roman[i++] = roman_nums[x].letter[j];
+    } else {
+      x--;
+      // x -= roman_nums[x].advance;
+    }
+  }
+
+  for (int k = 0; roman[k] != '\0'; k++)
+    printf("%c", roman[k]);
+
+  roman[i] = '\0';
+
   return roman;
 }
 

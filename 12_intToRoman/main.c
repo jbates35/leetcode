@@ -8,6 +8,10 @@
 
 #define TIME_TEST 0
 
+void funcTime(char *(*fp)(int), int x, char *funcName);
+
+///////////// START
+
 typedef struct RomanNum {
   char letter[3];
   int length;
@@ -15,21 +19,18 @@ typedef struct RomanNum {
   int value;
 } RomanNum;
 
-void funcTime(char *(*fp)(int), int x, char *funcName);
+RomanNum roman_nums[13] = {
+    {"I", 1, 1, 1},   {"IV", 2, 2, 4},   {"V", 1, 1, 5},   {"IX", 2, 4, 9},
+    {"X", 1, 1, 10},  {"XL", 2, 2, 40},  {"L", 1, 1, 50},  {"XC", 2, 4, 90},
+    {"C", 1, 1, 100}, {"CD", 2, 2, 400}, {"D", 1, 1, 500}, {"CM", 2, 4, 900},
+    {"M", 1, 1, 1000}
 
-///////////// START
+};
 
 char *intToRoman(int num) {
-  RomanNum roman_nums[13] = {
-      {"I", 1, 1, 1},   {"IV", 2, 2, 4},   {"V", 1, 1, 5},   {"IX", 2, 4, 4},
-      {"X", 1, 1, 10},  {"XL", 2, 2, 40},  {"L", 1, 1, 50},  {"XC", 2, 4, 90},
-      {"C", 1, 1, 100}, {"CD", 2, 2, 400}, {"D", 1, 1, 500}, {"CM", 2, 4, 900},
-      {"M", 1, 1, 1000}
-
-  };
-
   int x = 12;
   int i = 0;
+
   char *roman = malloc(16);
 
   while (x >= 0) {
@@ -38,13 +39,12 @@ char *intToRoman(int num) {
       for (int j = 0; j < roman_nums[x].length; j++)
         roman[i++] = roman_nums[x].letter[j];
     } else {
-      x--;
-      // x -= roman_nums[x].advance;
+      if (x % 2 && i > 1 && roman[i - 2] == roman_nums[x].letter[0])
+        x -= roman_nums[x].advance;
+      else
+        x--;
     }
   }
-
-  for (int k = 0; roman[k] != '\0'; k++)
-    printf("%c", roman[k]);
 
   roman[i] = '\0';
 
@@ -54,16 +54,14 @@ char *intToRoman(int num) {
 //////////// END
 
 int main() {
-  int A[] = {3,    58,   1994, 1,    0,    3999, 3499, 3498, 3333, 2999,
-             2998, 2997, 2499, 2111, 1111, 3000, 2000, 1000, 500,  499};
+  int A[] = {3,    58,   1994, 1,    3999, 3499, 3498, 3333, 2999, 2998,
+             2997, 2499, 2111, 1111, 3000, 2000, 1000, 500,  499};
 
-  char *expected[] = {"III",       "LVIII",       "MCMXCIV",
-                      "I",         "0",           "MMMCMXCIX",
-                      "MMMCDXCIX", "MMMCDXCVIII", "MMMCCCXXXIII",
-                      "MMCMXCIX",  "MMCMXCVIII",  "MMCMXCVII",
-                      "MMCDXCIX",  "MMCXI",       "MCXI",
-                      "MMM",       "MM",          "M",
-                      "D",         "CDXCIX"};
+  char *expected[] = {"III",       "LVIII",      "MCMXCIV",     "I",
+                      "MMMCMXCIX", "MMMCDXCIX",  "MMMCDXCVIII", "MMMCCCXXXIII",
+                      "MMCMXCIX",  "MMCMXCVIII", "MMCMXCVII",   "MMCDXCIX",
+                      "MMCXI",     "MCXI",       "MMM",         "MM",
+                      "M",         "D",          "CDXCIX"};
 
   for (int i = 0; i < sizeof(A) / sizeof(A[0]); i++) {
     char *ret = intToRoman(A[i]);

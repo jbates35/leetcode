@@ -8,6 +8,12 @@
 
 #define TIME_TEST 0
 
+typedef struct RomanNum {
+  char letter[2];
+  int length;
+  int value;
+} RomanNum;
+
 void funcTime(int (*fp)(char *), char *x, char *funcName);
 
 ///////////// START

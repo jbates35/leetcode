@@ -49,11 +49,7 @@ struct ListNode *mergeTwoLists(struct ListNode *list1, struct ListNode *list2) {
   }
 
   // Attach to the end the remaining list
-  if (list1)
-    p->next = list1;
-  else
-    p->next = list2;
-
+  p->next = list1 ? list1 : list2;
   return head;
 }
 

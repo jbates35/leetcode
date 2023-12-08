@@ -11,30 +11,83 @@
 void funcTime(bool (*fp)(char *), char *s, char *funcName);
 
 ///////////// START
+struct Parens {
+  char match;
+  bool is_open;
+};
 
-bool isValid(char *s) { return true; }
+struct Parens make_paren(char match, bool is_open) {
+  struct Parens retStruct;
+  retStruct.match = match;
+  retStruct.is_open = is_open;
+  return retStruct;
+}
 
-//////////// END
+struct Parens parens[128];
+
+struct stack {
+  int size;
+  int top;
+  char *s;
+};
+
+bool isValid(char *s) {
+  parens['('] = make_paren(')', true);
+  parens[')'] = make_paren('(', false);
+  parens['['] = make_paren(']', true);
+  parens[']'] = make_paren('[', false);
+  parens['{'] = make_paren('}', true);
+  parens['}'] = make_paren('{', false);
+
+  bool retVal = true;
+
+  int arrsize = strlen(s);
+  char *s_stack = malloc(arrsize);
+  int s_cnt = -1;
+
+  for (int i = 0; s[i] != '\0'; i++) {
+    if (parens[s[i]].is_open == true) {
+      s_stack[++s_cnt] = s[i];
+      continue;
+    }
+
+    if (s_cnt != -1 && s_stack[s_cnt] == parens[s[i]].match) {
+      s_cnt--;
+      continue;
+    }
+
+    retVal = false;
+    break;
+  }
+
+  free(s_stack);
+  return retVal && (s_cnt == -1);
+}
 
 int main() {
 
-  char *inputs[] = {
-      "()",
-      "()[]{}",
-      "(]",
-      "([)]",
-      "{[]}",
-      "(([]){})",
-      "(((())))(((((((((()))))))))))",
-      "(({})([])((([]{}{(((((({})(({})([])((([]{}{(((((({}(({})([])((([]{}{(((("
-      "(({})(({})([])((([]{}{(((((({}))))))})))))))))}))))))))))})))))))))}))))"
-      "(({})([])((([]{}{(((((({}(({})([])((([]{}{(((((({}(({})([])((([]{}{((((("
-      "({}())))))})))))))))}))))))))))})))))))",
-      "(({})([])((([]{}{(((((({}(({})([])((([]{}{(((((({}(({})([])((([]{}{(((("
-      "("};
-  bool expected[] = {true, true, false, false, true, true, true, true, false};
+  char *inputs[] = {"()",
+                    "({{{{}}}))",
+                    "()[]{}",
+                    "(]",
+                    "([)]",
+                    "{[]}",
+                    "(([]){})",
+                    "(((())))(((((((((())))))))))",
+                    "(({})([])((([]{}{(((((({})(({})([])((([]{}{(((((({}(({})"
+                    "([])((([]{}{(((("
+                    "(({})(({})([])((([]{}{(((((({}))))))})))))))))})))))))))"
+                    ")})))))))))}))))"
+                    "(({})([])((([]{}{(((((({}(({})([])((([]{}{(((((({}(({})("
+                    "[])((([]{}{((((("
+                    "({}())))))})))))))))}))))))))))}))))))",
+                    "(({})([])((([]{}{(((((({}(({})([])((([]{}{(((((({}(({})("
+                    "[])((([]{}{(((("
+                    "("};
+  bool expected[] = {true, false, true, false, false,
+                     true, true,  true, true,  false};
 
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < sizeof(expected) / sizeof(bool); i++) {
     bool result = isValid(inputs[i]);
     printf("Result for %s is %s\n", inputs[i], result ? "true" : "false");
     printf("Expected for %s is %s\n", inputs[i],
